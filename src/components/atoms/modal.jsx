@@ -12,6 +12,7 @@ import {
   FiDownload,
 } from "react-icons/fi";
 import { capitalizeWords } from "../../utils/Utils";
+import { FaTimes, FaSave, FaBan } from "react-icons/fa";
 
 const FormField = ({ label, htmlFor, children, error }) => (
   <div className="form-control w-full">
@@ -402,7 +403,7 @@ export const ModalDetailKaryawan = (props) => {
                 document.getElementById(idModal).close();
               }}
             >
-              Batal
+              <FaBan className="mr-2" /> Batal
             </button>
             <button
               type="submit"
@@ -411,7 +412,7 @@ export const ModalDetailKaryawan = (props) => {
                 document.getElementById(idModal).close();
               }}
             >
-              Simpan Perubahan
+              <FaSave className="mr-2" /> Simpan Perubahan
             </button>
           </div>
         </form>
@@ -569,24 +570,24 @@ export const ModalKeluargaKaryawan = (props) => {
             </div>
           </div>
 
-          <div className="modal-action px-6 py-4 border-t border-slate-200 flex justify-end gap-3">
+          <div className="modal-action pt-4 mt-auto border-t border-slate-200 sticky -bottom-5 bg-white py-4 px-6 ">
             <button
               type="button"
-              className="btn btn-ghost"
+              className="btn btn-ghost text-slate-700 bg-red-600 hover:bg-red-700"
               onClick={() => {
                 document.getElementById(idModal).close();
               }}
             >
-              Batal
+              <FaBan className="mr-2" /> Batal
             </button>
             <button
               type="submit"
-              className="btn btn-primary"
+              className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white"
               onClick={() => {
                 document.getElementById(idModal).close();
               }}
             >
-              Simpan
+              <FaSave className="mr-2" /> Simpan Perubahan
             </button>
           </div>
         </form>
@@ -1209,6 +1210,194 @@ export const ModalExcelKeluarga = (props) => {
       </div>
       <form method="dialog" className="modal-backdrop">
         <button type="button" onClick={closeModalAndReset}>
+          close
+        </button>
+      </form>
+    </dialog>
+  );
+};
+
+const defaultFormValues = {
+  name: "",
+  qty: "",
+};
+
+export const ModalUpdatedPrize = (props) => {
+  const { idModal, currentData, onUpdateSuccess } = props;
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    defaultValues: defaultFormValues,
+  });
+
+  useEffect(() => {
+    if (currentData) {
+      setValue("name", currentData.name || "");
+      setValue(
+        "qty",
+        currentData.initial_qty !== undefined
+          ? currentData.initial_qty
+          : currentData.qty !== undefined
+          ? currentData.qty
+          : ""
+      );
+    } else {
+      reset(defaultFormValues);
+    }
+  }, [currentData, setValue, reset]);
+
+  const onSubmit = async (data) => {
+    const result = await Swal.fire({
+      title: "Konfirmasi Perubahan",
+      text: "Apakah Anda yakin ingin menyimpan perubahan pada hadiah ini?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Ya, Simpan!",
+      cancelButtonText: "Batal",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const payload = {
+          name: data.name,
+          qty: parseInt(data.qty, 10),
+        };
+        const response = await axios.patch(
+          `/prizes/${currentData.id}`,
+          payload
+        );
+
+        toast.success(response.data.message || "Hadiah berhasil diperbarui!");
+        if (onUpdateSuccess) {
+          onUpdateSuccess();
+        }
+        document.getElementById(idModal).close();
+      } catch (error) {
+        console.error("Error updating prize:", error);
+        toast.error(
+          error.response?.data?.message || "Gagal memperbarui hadiah."
+        );
+      }
+    }
+  };
+
+  return (
+    <dialog id={idModal} className="modal modal-bottom sm:modal-middle">
+      <div className="modal-box bg-white text-slate-800 max-w-lg p-0 rounded-lg shadow-xl">
+        <div className="px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+          <h3 className="font-bold text-xl text-slate-700">
+            Update Detail Hadiah
+          </h3>
+          <button
+            type="button"
+            onClick={() => {
+              document.getElementById(idModal).close();
+            }}
+            className="btn btn-sm btn-circle btn-ghost text-slate-500 hover:bg-slate-100"
+            aria-label="Tutup modal"
+          >
+            <FaTimes />
+          </button>
+        </div>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex flex-col gap-4 px-6 py-5 max-h-[70vh] overflow-y-auto"
+        >
+          <div className="form-control w-full">
+            <label htmlFor="prizeName" className="label pb-1">
+              <span className="label-text text-sm font-medium text-slate-700">
+                Nama Hadiah
+              </span>
+            </label>
+            <input
+              id="prizeName"
+              type="text"
+              placeholder="Masukkan nama hadiah"
+              className={`input input-bordered w-full bg-white border-slate-300 focus:border-blue-500 focus:ring-blue-500
+                ${
+                  errors.name
+                    ? "input-error border-red-400 focus:border-red-500 focus:ring-red-500"
+                    : ""
+                }`}
+              {...register("name", {
+                required: "Nama hadiah tidak boleh kosong.",
+              })}
+            />
+            {errors.name && (
+              <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
+            )}
+          </div>
+
+          <div className="form-control w-full">
+            <label htmlFor="prizeQty" className="label pb-1">
+              <span className="label-text text-sm font-medium text-slate-700">
+                Kuantitas (Qty)
+              </span>
+            </label>
+            <input
+              id="prizeQty"
+              type="number"
+              placeholder="Masukkan jumlah kuantitas"
+              className={`input input-bordered w-full bg-white border-slate-300 focus:border-blue-500 focus:ring-blue-500
+                ${
+                  errors.qty
+                    ? "input-error border-red-400 focus:border-red-500 focus:ring-red-500"
+                    : ""
+                }`}
+              {...register("qty", {
+                required: "Kuantitas tidak boleh kosong.",
+                valueAsNumber: true,
+                min: { value: 0, message: "Kuantitas tidak boleh negatif." },
+              })}
+            />
+            {errors.qty && (
+              <p className="text-red-500 text-xs mt-1">{errors.qty.message}</p>
+            )}
+          </div>
+
+          <div className="modal-action pt-6 mt-4 border-t border-slate-200">
+            <button
+              type="button"
+              className="btn btn-ghost bg-[#e63939] hover:bg-[#ff3636] text-slate-700"
+              onClick={() => {
+                document.getElementById(idModal).close();
+              }}
+              disabled={isSubmitting}
+            >
+              <FaBan className="mr-2" /> Batal
+            </button>
+            <button
+              type="submit"
+              className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white"
+              onClick={() => {
+                document.getElementById(idModal).close();
+              }}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <span className="loading loading-spinner loading-sm"></span>
+              ) : (
+                <FaSave className="mr-2" />
+              )}
+              Simpan Perubahan
+            </button>
+          </div>
+        </form>
+      </div>
+      {/* Untuk menutup modal dengan klik backdrop */}
+      <form method="dialog" className="modal-backdrop">
+        <button
+          type="button"
+          onClick={() => {
+            document.getElementById(idModal).close();
+          }}
+        >
           close
         </button>
       </form>

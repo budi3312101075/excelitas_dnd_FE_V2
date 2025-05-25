@@ -4,10 +4,11 @@ import { useEffect } from "react";
 import DataTable from "../../components/moleculs/table";
 import { Button } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import VisibilityIcon from "@mui/icons-material/Visibility";
+import EditIcon from "@mui/icons-material/Edit";
 import axios from "axios";
 import Swal from "sweetalert2";
 import { toast } from "react-toastify";
+import { ModalUpdatedPrize } from "../../components/atoms/modal";
 
 const Prize = () => {
   const [data, setData] = useState([]);
@@ -88,18 +89,26 @@ const Prize = () => {
           <Button
             variant="contained"
             size="small"
-            startIcon={<VisibilityIcon />}
+            startIcon={<EditIcon sx={{ fontSize: "1rem" }} />}
             onClick={() => {
-              document.getElementById("detailData").showModal();
+              document.getElementById("updatedPrize").showModal();
               setCurrentData(params.row);
             }}
             sx={{
               textTransform: "none",
-              backgroundColor: "#239f52",
+              backgroundColor: "#f59e0b", // Warna kuning/amber (Tailwind amber-500)
+              color: "#ffffff", // Teks putih kontras baik dengan amber ini
+              // Jika ingin teks hitam: color: 'rgba(0, 0, 0, 0.87)',
               fontSize: "12px",
+              padding: "4px 10px",
+              "&:hover": {
+                backgroundColor: "#d97706", // Amber yang lebih gelap (Tailwind amber-600)
+              },
+              borderRadius: "6px",
+              boxShadow: "0 2px 4px rgba(0,0,0,0.07)",
             }}
           >
-            Detail
+            Ubah
           </Button>
           <Button
             variant="contained"
@@ -140,6 +149,11 @@ const Prize = () => {
         Data Hadiah
       </h1>
       <DataTable rows={data} columns={columns} getRowId={(row) => row.id} />
+      <ModalUpdatedPrize
+        idModal="updatedPrize"
+        currentData={currentData}
+        onUpdateSuccess={getData}
+      />
     </Layout>
   );
 };
