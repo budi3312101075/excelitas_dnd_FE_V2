@@ -10,6 +10,7 @@ import NotFound from "./pages/auth/404";
 import Karyawan from "./pages/karyawan";
 import KeluargaKaryawan from "./pages/KeluargaKaryawan";
 import RegisterEvent from "./pages/registerEvent";
+import LuckyEvent from "./pages/luckyEvent";
 
 function App() {
   const navigate = useNavigate();
@@ -46,6 +47,7 @@ function App() {
           <Route path="/karyawan" element={<Karyawan />} />
           <Route path="/keluargaKaryawan" element={<KeluargaKaryawan />} />
           <Route exact path="/registerEvent" element={<RegisterEvent />} />
+          <Route exact path="/luckyEvent" element={<LuckyEvent />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </>

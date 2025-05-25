@@ -11,6 +11,7 @@ import {
   MdMenu,
   MdClose,
 } from "react-icons/md";
+import { CgGames } from "react-icons/cg";
 
 const NavItem = ({ to, icon: Icon, label, isActive, isSubItem = false }) => (
   <li>
@@ -139,13 +140,21 @@ function Sidebar({ variant = "default" }) {
         },
       ],
     },
-    // Tambahkan item atau grup lain di sini
-    // {
-    //   groupLabel: "Pengaturan",
-    //   items: [
-    //     { label: "Sidebar Settings", icon: MdSettings, path: "/sidebarSetting" }
-    //   ]
-    // }
+    {
+      groupLabel: "Event",
+      items: [
+        {
+          label: "Register Event",
+          icon: MdFolderOpen,
+          path: "/registerEvent",
+        },
+        {
+          label: "Lucky Event",
+          icon: CgGames,
+          path: "/luckyEvent",
+        },
+      ],
+    },
   ];
 
   return (
