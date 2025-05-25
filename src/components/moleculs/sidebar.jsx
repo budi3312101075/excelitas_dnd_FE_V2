@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import logo from "../../images/logo.jpg"; // Pastikan path logo benar
 import { useState, useEffect } from "react";
-import { BsSignYield } from "react-icons/bs";
+import { BsGift, BsSignYield } from "react-icons/bs";
 import {
   MdDashboard,
   MdPeopleOutline,
@@ -122,6 +122,11 @@ function Sidebar({ variant = "default" }) {
             { label: "Lucky Draw", path: "/luckyDraw" },
             { label: "Grand Prize", path: "/grandPrize" },
           ],
+        },
+        {
+          label: "Prize",
+          icon: BsGift,
+          path: "/prize",
         },
       ],
     },

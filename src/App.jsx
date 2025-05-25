@@ -11,6 +11,10 @@ import Karyawan from "./pages/karyawan";
 import KeluargaKaryawan from "./pages/KeluargaKaryawan";
 import RegisterEvent from "./pages/registerEvent";
 import LuckyEvent from "./pages/luckyEvent";
+import LuckyDip from "./pages/luckyEvent/luckyDip";
+import LuckyDraw from "./pages/luckyEvent/luckyDraw";
+import GrandPrize from "./pages/luckyEvent/grandPrize";
+import Prize from "./pages/luckyEvent/prize";
 
 function App() {
   const navigate = useNavigate();
@@ -46,8 +50,12 @@ function App() {
           <Route exact path="/" element={<Dashboard />} />
           <Route path="/karyawan" element={<Karyawan />} />
           <Route path="/keluargaKaryawan" element={<KeluargaKaryawan />} />
-          <Route exact path="/registerEvent" element={<RegisterEvent />} />
-          <Route exact path="/luckyEvent" element={<LuckyEvent />} />
+          <Route path="/registerEvent" element={<RegisterEvent />} />
+          <Route path="/luckyEvent" element={<LuckyEvent />} />
+          <Route path="/luckyDip" element={<LuckyDip />} />
+          <Route path="/luckyDraw" element={<LuckyDraw />} />
+          <Route path="/grandPrize" element={<GrandPrize />} />
+          <Route path="/prize" element={<Prize />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </>
