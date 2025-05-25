@@ -12,9 +12,11 @@ import {
   FaCheckCircle,
   FaExclamationTriangle,
 } from "react-icons/fa";
-import Layout from "../components/moleculs/layout"; // Sesuaikan path
+import { Rnd } from "react-rnd"; // Impor Rnd
 
-// Komponen Modal untuk Pengaturan (Diasumsikan SAMA dan sudah BENAR dari kode Anda sebelumnya)
+// ... (kode dummyNamesForSpin, fetchAllPrizes, dll tetap sama) ...
+
+// Komponen Modal untuk Pengaturan
 const SettingsModal = ({
   isOpen,
   onClose,
@@ -27,6 +29,15 @@ const SettingsModal = ({
   const [localNumToDraw, setLocalNumToDraw] = useState(1);
   const [localSelectedLuckyDipPrizes, setLocalSelectedLuckyDipPrizes] =
     useState([]);
+
+  // State untuk posisi dan ukuran modal Rnd
+  const [rndState, setRndState] = useState({
+    width: 600, // Lebar awal (sesuaikan dengan max-w-lg atau lebih besar)
+    height: "auto", // Tinggi otomatis atau bisa juga angka
+    x: (window.innerWidth - 600) / 2, // Posisi X awal (tengah)
+    y: 100, // Posisi Y awal
+  });
+
   const availablePrizesForSelection = prizes.filter((p) => p.available_qty > 0);
 
   const handlePrizeCheckboxChange = (prizeId) => {
@@ -58,153 +69,212 @@ const SettingsModal = ({
     setLocalSelectedLuckyDipPrizes([]);
   }, [localActionGacha]);
 
+  // Update posisi tengah jika window diresize (opsional)
+  useEffect(() => {
+    const handleResize = () => {
+      setRndState((prev) => ({
+        ...prev,
+        x: (window.innerWidth - prev.width) / 2,
+        // y: (window.innerHeight - prev.height) / 2 // jika height juga angka
+      }));
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [rndState.width]);
+
   if (!isOpen) return null;
 
   return (
-    // JSX untuk SettingsModal dari kode Anda sebelumnya
-    // Saya akan menyertakan versi ringkas untuk menghemat ruang, pastikan Anda menggunakan versi lengkap Anda
-    <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[100] p-4 backdrop-blur-sm">
-      <div className="bg-slate-800 p-6 md:p-8 rounded-xl shadow-2xl w-full max-w-lg border border-slate-700">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-white flex items-center">
-            <FaCog className="mr-2 text-pink-500" /> Pengaturan Undian
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-slate-400 hover:text-white transition-colors"
-          >
-            <FaTimes size={24} />
-          </button>
-        </div>
-        <div className="space-y-6">
-          <div>
-            <label
-              htmlFor="actionGacha"
-              className="block text-sm font-medium text-slate-300 mb-1"
+    // Backdrop tetap menggunakan fixed positioning untuk menutupi layar
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[99] p-4 backdrop-blur-sm">
+      <Rnd
+        size={{ width: rndState.width, height: rndState.height }}
+        position={{ x: rndState.x, y: rndState.y }}
+        onDragStop={(e, d) => {
+          setRndState((prev) => ({ ...prev, x: d.x, y: d.y }));
+        }}
+        onResizeStop={(e, direction, ref, delta, position) => {
+          setRndState({
+            width: parseInt(ref.style.width, 10),
+            height: parseInt(ref.style.height, 10), // atau 'auto' jika tidak ingin set height manual dari resize
+            ...position,
+          });
+        }}
+        minWidth={400} // Lebar minimum modal
+        minHeight={450} // Tinggi minimum modal (sesuaikan dengan konten)
+        bounds="parent" // Agar tidak bisa ditarik keluar dari backdrop (atau 'window')
+        dragHandleClassName="modal-drag-handle" // Kelas untuk area drag (header modal)
+        className="z-[100] flex" // Pastikan Rnd di atas backdrop
+        enableResizing={{
+          // Aktifkan handle resize yang diinginkan
+          top: false,
+          right: true,
+          bottom: true,
+          left: false,
+          topRight: false,
+          bottomRight: true,
+          bottomLeft: false,
+          topLeft: false,
+        }}
+      >
+        {/* Konten Modal Anda */}
+        <div className="bg-slate-800 rounded-xl shadow-2xl w-full h-full flex flex-col border border-slate-700 overflow-hidden">
+          {" "}
+          {/* h-full agar konten mengisi Rnd */}
+          {/* Header Modal (Area untuk Drag) */}
+          <div className="modal-drag-handle cursor-move px-6 py-4 md:px-8 md:py-5 flex justify-between items-center border-b border-slate-700 bg-slate-800 rounded-t-xl">
+            <h2 className="text-xl font-bold text-white flex items-center select-none">
+              {" "}
+              {/* select-none agar teks tidak terseleksi saat drag */}
+              <FaCog className="mr-2 text-pink-500" /> Pengaturan Undian
+            </h2>
+            <button
+              onClick={onClose}
+              className="text-slate-400 hover:text-white transition-colors"
             >
-              Jenis Undian
-            </label>
-            <select
-              id="actionGacha"
-              value={localActionGacha}
-              onChange={(e) => setLocalActionGacha(e.target.value)}
-              className="w-full p-3 bg-slate-700 text-white border border-slate-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
-            >
-              <option value="LUCKY_DIP">
-                Lucky Dip (Acak Semua Hadiah Dipilih)
-              </option>
-              <option value="LUCKY_DRAW">
-                Lucky Draw (Pilih Hadiah Spesifik)
-              </option>
-              <option value="GRAND_PRIZE">
-                Grand Prize (Pilih Hadiah Spesifik)
-              </option>
-            </select>
+              <FaTimes size={20} />
+            </button>
           </div>
-          {localActionGacha === "LUCKY_DIP" && (
+          {/* Isi Form Modal (dibuat scrollable jika kontennya melebihi tinggi Rnd) */}
+          <div className="space-y-5 p-6 md:p-8 overflow-y-auto flex-grow">
+            {/* ... Isi form pengaturan Anda (Jenis Undian, Pilih Hadiah, dll.) ... */}
+            {/* Contoh satu field: */}
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                Pilih Hadiah untuk Lucky Dip:
+              <label
+                htmlFor="actionGachaModal"
+                className="block text-sm font-medium text-slate-300 mb-1"
+              >
+                Jenis Undian
               </label>
-              {isLoadingPrizes ? (
-                <p className="text-slate-400">Memuat hadiah...</p>
-              ) : availablePrizesForSelection.length > 0 ? (
-                <div className="space-y-2 max-h-48 overflow-y-auto bg-slate-700 p-3 rounded-md border border-slate-600">
-                  {availablePrizesForSelection.map((prize) => (
-                    <label
-                      key={prize.id}
-                      className="flex items-center space-x-3 p-2.5 rounded hover:bg-slate-600 cursor-pointer transition-colors"
-                    >
-                      <input
-                        type="checkbox"
-                        className="checkbox checkbox-sm checkbox-secondary"
-                        checked={localSelectedLuckyDipPrizes.includes(prize.id)}
-                        onChange={() => handlePrizeCheckboxChange(prize.id)}
-                      />
-                      <span className="text-slate-200">
-                        {prize.name} (Sisa: {prize.available_qty})
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-slate-400">Tidak ada hadiah tersedia.</p>
-              )}
+              <select
+                id="actionGachaModal"
+                value={localActionGacha}
+                onChange={(e) => setLocalActionGacha(e.target.value)}
+                className="w-full p-3 bg-slate-700 text-white border border-slate-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
+              >
+                <option value="LUCKY_DIP">
+                  Lucky Dip (Acak Semua Hadiah Dipilih)
+                </option>
+                <option value="LUCKY_DRAW">
+                  Lucky Draw (Pilih Hadiah Spesifik)
+                </option>
+                <option value="GRAND_PRIZE">
+                  Grand Prize (Pilih Hadiah Spesifik)
+                </option>
+              </select>
             </div>
-          )}
-          {(localActionGacha === "LUCKY_DRAW" ||
-            localActionGacha === "GRAND_PRIZE") && (
-            <>
+
+            {localActionGacha === "LUCKY_DIP" && (
               <div>
-                <label
-                  htmlFor="selectedPrizeId"
-                  className="block text-sm font-medium text-slate-300 mb-1"
-                >
-                  Pilih Hadiah
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Pilih Hadiah untuk Lucky Dip:
                 </label>
                 {isLoadingPrizes ? (
                   <p className="text-slate-400">Memuat hadiah...</p>
-                ) : (
-                  <select
-                    id="selectedPrizeId"
-                    value={localSelectedPrizeId}
-                    onChange={(e) => setLocalSelectedPrizeId(e.target.value)}
-                    className="w-full p-3 bg-slate-700 text-white border border-slate-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
-                    disabled={availablePrizesForSelection.length === 0}
-                  >
-                    <option value="">
-                      --{" "}
-                      {availablePrizesForSelection.length === 0
-                        ? "Tidak ada hadiah"
-                        : "Pilih Hadiah"}{" "}
-                      --
-                    </option>
+                ) : availablePrizesForSelection.length > 0 ? (
+                  <div className="space-y-2 max-h-40 overflow-y-auto bg-slate-700 p-3 rounded-md border border-slate-600">
                     {availablePrizesForSelection.map((prize) => (
-                      <option key={prize.id} value={prize.id}>
-                        {prize.name} (Sisa: {prize.available_qty})
-                      </option>
+                      <label
+                        key={prize.id}
+                        className="flex items-center space-x-3 p-2 rounded hover:bg-slate-600 cursor-pointer transition-colors"
+                      >
+                        <input
+                          type="checkbox"
+                          className="checkbox checkbox-sm checkbox-secondary"
+                          checked={localSelectedLuckyDipPrizes.includes(
+                            prize.id
+                          )}
+                          onChange={() => handlePrizeCheckboxChange(prize.id)}
+                        />
+                        <span className="text-slate-200 text-sm">
+                          {prize.name} (Sisa: {prize.available_qty})
+                        </span>
+                      </label>
                     ))}
-                  </select>
+                  </div>
+                ) : (
+                  <p className="text-slate-400">Tidak ada hadiah tersedia.</p>
                 )}
               </div>
-              <div>
-                <label
-                  htmlFor="numToDraw"
-                  className="block text-sm font-medium text-slate-300 mb-1"
-                >
-                  Jumlah Pemenang per Tarikan
-                </label>
-                <input
-                  type="number"
-                  id="numToDraw"
-                  value={localNumToDraw}
-                  onChange={(e) =>
-                    setLocalNumToDraw(
-                      Math.max(1, parseInt(e.target.value) || 1)
-                    )
-                  }
-                  min="1"
-                  className="w-full p-3 bg-slate-700 text-white border border-slate-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
-                />
-              </div>
-            </>
-          )}
-          <div className="flex justify-end space-x-3 pt-4">
-            <button
-              onClick={onClose}
-              className="btn btn-ghost text-slate-300 hover:bg-slate-700"
-            >
-              Batal
-            </button>
-            <button
-              onClick={handleApply}
-              className="btn btn-primary bg-pink-600 hover:bg-pink-700 border-pink-600 hover:border-pink-700"
-            >
-              Terapkan Pengaturan
-            </button>
+            )}
+
+            {(localActionGacha === "LUCKY_DRAW" ||
+              localActionGacha === "GRAND_PRIZE") && (
+              <>
+                <div>
+                  <label
+                    htmlFor="selectedPrizeIdModal"
+                    className="block text-sm font-medium text-slate-300 mb-1"
+                  >
+                    Pilih Hadiah
+                  </label>
+                  {isLoadingPrizes ? (
+                    <p className="text-slate-400">Memuat hadiah...</p>
+                  ) : (
+                    <select
+                      id="selectedPrizeIdModal"
+                      value={localSelectedPrizeId}
+                      onChange={(e) => setLocalSelectedPrizeId(e.target.value)}
+                      className="w-full p-3 bg-slate-700 text-white border border-slate-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
+                      disabled={availablePrizesForSelection.length === 0}
+                    >
+                      <option value="">
+                        --{" "}
+                        {availablePrizesForSelection.length === 0
+                          ? "Tidak ada hadiah"
+                          : "Pilih Hadiah"}{" "}
+                        --
+                      </option>
+                      {availablePrizesForSelection.map((prize) => (
+                        <option key={prize.id} value={prize.id}>
+                          {prize.name} (Sisa: {prize.available_qty})
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+                <div>
+                  <label
+                    htmlFor="numToDrawModal"
+                    className="block text-sm font-medium text-slate-300 mb-1"
+                  >
+                    Jumlah Pemenang per Tarikan
+                  </label>
+                  <input
+                    type="number"
+                    id="numToDrawModal"
+                    value={localNumToDraw}
+                    onChange={(e) =>
+                      setLocalNumToDraw(
+                        Math.max(1, parseInt(e.target.value) || 1)
+                      )
+                    }
+                    min="1"
+                    className="w-full p-3 bg-slate-700 text-white border border-slate-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
+                  />
+                </div>
+              </>
+            )}
+          </div>
+          {/* Footer Modal dengan Tombol Aksi */}
+          <div className="px-6 py-4 md:px-8 md:py-5 border-t border-slate-700 bg-slate-800 rounded-b-xl">
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={onClose}
+                className="btn btn-ghost text-slate-300 hover:bg-slate-700"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleApply}
+                className="btn btn-primary bg-pink-600 hover:bg-pink-700 border-pink-600 hover:border-pink-700"
+              >
+                Terapkan Pengaturan
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </Rnd>
     </div>
   );
 };
