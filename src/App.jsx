@@ -15,6 +15,7 @@ import LuckyDip from "./pages/luckyEvent/luckyDip";
 import LuckyDraw from "./pages/luckyEvent/luckyDraw";
 import GrandPrize from "./pages/luckyEvent/grandPrize";
 import Prize from "./pages/luckyEvent/prize";
+import ScanMobile from "./pages/scanMobile";
 
 function App() {
   const navigate = useNavigate();
@@ -56,6 +57,7 @@ function App() {
           <Route path="/luckyDraw" element={<LuckyDraw />} />
           <Route path="/grandPrize" element={<GrandPrize />} />
           <Route path="/prize" element={<Prize />} />
+          <Route path="/scanMobile" element={<ScanMobile />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </>

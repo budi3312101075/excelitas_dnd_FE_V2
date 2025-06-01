@@ -34,7 +34,7 @@ const Karyawan = () => {
       getData();
       toast.success(response.data.message);
     } catch (error) {
-      toast.error(error.response.data.message);
+      toast.error("Karyawan tidak dapat dihapus karena pemenang prize");
       console.log("Something went wrong❗", error);
     }
   };

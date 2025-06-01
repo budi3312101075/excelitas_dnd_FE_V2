@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import logo from "../../images/logo.jpg"; // Pastikan path logo benar
 import { useState, useEffect } from "react";
-import { BsGift, BsSignYield } from "react-icons/bs";
+import { BsGift, BsQrCodeScan, BsSignYield } from "react-icons/bs";
 import {
   MdDashboard,
   MdPeopleOutline,
@@ -148,6 +148,11 @@ function Sidebar({ variant = "default" }) {
     {
       groupLabel: "Event",
       items: [
+        {
+          label: "Scanning",
+          icon: BsQrCodeScan,
+          path: "/scanMobile",
+        },
         {
           label: "Register Event",
           icon: MdFolderOpen,
